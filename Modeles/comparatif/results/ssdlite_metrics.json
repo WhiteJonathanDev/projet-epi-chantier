@@ -1,0 +1,36 @@
+{
+  "precision_per_class": {
+    "helmet": 0.0,
+    "head": 0.5284280936454849,
+    "safety-vest": 0.0
+  },
+  "recall_per_class": {
+    "helmet": 0.0,
+    "head": 0.5392491467576792,
+    "safety-vest": 0.0
+  },
+  "f1_per_class": {
+    "helmet": 0.0,
+    "head": 0.5337837837837838,
+    "safety-vest": 0.0
+  },
+  "ap50_per_class": {
+    "helmet": 8.343993859034115e-05,
+    "head": 0.5530323357286001,
+    "safety-vest": 0.0
+  },
+  "map50": 0.18437192522239684,
+  "precision_mean": 0.17614269788182832,
+  "recall_mean": 0.17974971558589306,
+  "f1_mean": 0.17792792792792791,
+  "latency_ms_per_image": 32.31868932121679,
+  "n_params_millions": 2.23424,
+  "device": "cpu",
+  "n_eval_images": 150,
+  "train_time_seconds": 536.9281599521637,
+  "model": "ssdlite",
+  "epochs": 3,
+  "train_size": 600,
+  "val_size": 150,
+  "img_size": 320
+}

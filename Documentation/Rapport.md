@@ -266,8 +266,25 @@ image, nombre de paramètres comme proxy de l'empreinte énergétique).
   computing)
 - Robustesse qualitative (architecture two-stage vs one-stage face aux occlusions)
 
-_[Voir `Modeles/comparatif/RESULTATS.md` pour les chiffres et le tableau comparatif final,
-et le graphique associé.]_
+**Résultats (jeu de validation, dataset EPI 3 classes) :**
+
+| Modèle | Précision | Rappel | F1 | mAP@50 | Latence (ms/image, CPU) | Paramètres (M) |
+|---|---|---|---|---|---|---|
+| YOLO26-nano | 0,693 | 0,554 | 0,617 | 0,617 | ~141 | 2,50 |
+| Faster R-CNN (MobileNetV3-FPN) | 0,255 | 0,231 | 0,243 | 0,311 | ~144 | 18,94 |
+| SSDlite320 (MobileNetV3) | 0,176 | 0,180 | 0,178 | 0,184 | ~32 | 2,23 |
+
+![Comparatif des 3 modèles : mAP@50, latence, nombre de paramètres](figures/comparatif_modeles.png)
+
+**Lecture.** YOLO26-nano offre le meilleur compromis global (entraîné sur le dataset
+complet, contrairement aux deux autres — voir protocole ci-dessus), ce qui justifie son
+choix pour l'application (section 4.1). SSDlite320 est 4× plus rapide et 8× plus léger que
+Faster R-CNN, ce qui en fait le meilleur candidat pour un déploiement edge (caméra de
+chantier basse consommation) si son rappel est jugé suffisant après ré-entraînement sur le
+dataset complet. Faster R-CNN, plus lourd sans gain de latence CPU dans ce protocole,
+n'apporte pas d'avantage ici — son intérêt (précision supérieure) nécessiterait un GPU
+dédié pour être pleinement exploité. Le détail par classe et le protocole complet sont
+documentés dans `Modeles/comparatif/RESULTATS.md`.
 
 **Limites documentées.** Les faux positifs restent fréquents sur les gilets réfléchissants
 dans des conditions d'éclairage extrêmes (contre-jour, nuit), et le passage à l'échelle

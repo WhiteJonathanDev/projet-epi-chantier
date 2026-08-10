@@ -4,3 +4,5 @@ _tmp_upload.mp4
 dataset_kaggle/
 dataset_yolo/
 dataset_yolo_epi/
+__pycache__/
+*.pyc

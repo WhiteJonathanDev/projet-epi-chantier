@@ -250,11 +250,12 @@ dataset EPI (3 classes) :
 | Faster R-CNN (backbone MobileNetV3-FPN, torchvision) | two-stage, plus précis mais plus lent | pré-entraîné COCO |
 | SSDlite320 (backbone MobileNetV3, torchvision) | one-stage, très léger, edge computing | pré-entraîné COCO |
 
-**Protocole.** Les modèles torchvision (Faster R-CNN, SSDlite) ont été fine-tunés sur un
-sous-ensemble du dataset EPI (images redimensionnées, entraînement de la tête de
-détection uniquement, quelques epochs) — un compromis assumé face aux contraintes de
-calcul (CPU/GPU Apple Silicon, pas de cluster GPU dédié), cohérent avec le choix déjà fait
-pour YOLO (20 epochs, cf. 4.2). Le tableau chiffré complet, généré automatiquement par
+**Protocole.** Les trois modèles ont été entraînés avec un protocole strictement
+identique : dataset EPI complet (4 708 images d'entraînement), 30 epochs, résolution
+640×640, sur un serveur GPU dédié (NVIDIA L4, 24 Go VRAM, Scaleway) — une première version
+de ce comparatif, produite en CPU sur un sous-échantillon de 600 images faute de GPU
+disponible au moment de la rédaction initiale, a été remplacée par ces résultats une fois
+l'accès GPU obtenu. Le tableau chiffré complet, généré automatiquement par
 `Modeles/comparatif/train_eval.py`, est disponible dans
 `Modeles/comparatif/RESULTATS.md` (précision/rappel/F1/AP@50 par classe, latence par
 image, nombre de paramètres comme proxy de l'empreinte énergétique).
@@ -266,47 +267,49 @@ image, nombre de paramètres comme proxy de l'empreinte énergétique).
   computing)
 - Robustesse qualitative (architecture two-stage vs one-stage face aux occlusions)
 
-**Résultats (jeu de validation, dataset EPI 3 classes) :**
+**Résultats (jeu de validation, 1 327 images, dataset EPI 3 classes) :**
 
-| Modèle | Précision | Rappel | F1 | mAP@50 | Latence (ms/image, CPU) | Paramètres (M) |
+| Modèle | Précision | Rappel | F1 | mAP@50 | Latence (ms/image, GPU) | Paramètres (M) |
 |---|---|---|---|---|---|---|
-| YOLO26-nano | 0,693 | 0,554 | 0,617 | 0,617 | ~141 | 2,50 |
-| Faster R-CNN (MobileNetV3-FPN) | 0,255 | 0,231 | 0,243 | 0,311 | ~144 | 18,94 |
-| SSDlite320 (MobileNetV3) | 0,176 | 0,180 | 0,178 | 0,184 | ~32 | 2,23 |
+| YOLO26-nano | 0,719 | 0,576 | 0,639 | 0,616 | ~68 | 2,50 |
+| Faster R-CNN (MobileNetV3-FPN) | 0,675 | 0,589 | 0,627 | 0,561 | ~11,5 | 18,94 |
+| SSDlite320 (MobileNetV3) | 0,534 | 0,384 | 0,423 | 0,370 | ~4,9 | 2,23 |
 
 ![Comparatif des 3 modèles : mAP@50, latence, nombre de paramètres](figures/comparatif_modeles.png)
 
-**Lecture.** YOLO26-nano offre le meilleur compromis global (entraîné sur le dataset
-complet, contrairement aux deux autres — voir protocole ci-dessus), ce qui justifie son
-choix pour l'application (section 4.1). SSDlite320 est 4× plus rapide et 8× plus léger que
-Faster R-CNN, ce qui en fait le meilleur candidat pour un déploiement edge (caméra de
-chantier basse consommation) si son rappel est jugé suffisant après ré-entraînement sur le
-dataset complet. Faster R-CNN, plus lourd sans gain de latence CPU dans ce protocole,
-n'apporte pas d'avantage ici — son intérêt (précision supérieure) nécessiterait un GPU
-dédié pour être pleinement exploité. Le détail par classe et le protocole complet sont
-documentés dans `Modeles/comparatif/RESULTATS.md`.
+**Lecture.** YOLO26-nano reste le meilleur compromis global (mAP@50 0,616), ce qui
+confirme son choix pour l'application (section 4.1) — même après avoir aligné le
+protocole d'entraînement des 3 modèles. Faster R-CNN progresse nettement une fois
+entraîné sur le dataset complet (mAP@50 0,561, contre 0,311 avec 600 images) et devient
+compétitif sur la classe `head` (AP 0,843), au prix d'un modèle 8× plus lourd (76 Mo).
+SSDlite320 reste le plus léger et de très loin le plus rapide en inférence GPU (4,9
+ms/image, 14× plus rapide que YOLO), ce qui en fait le meilleur candidat pour un
+déploiement edge (caméra de chantier basse consommation) si son rappel plus faible est
+acceptable. Le détail par classe et le protocole complet sont documentés dans
+`Modeles/comparatif/RESULTATS.md`.
 
-**Limites documentées.** Les faux positifs restent fréquents sur les gilets réfléchissants
-dans des conditions d'éclairage extrêmes (contre-jour, nuit), et le passage à l'échelle
-complète (dataset entier, davantage d'epochs, GPU dédié) améliorerait vraisemblablement
-tous les modèles de façon comparable — le classement relatif observé ici reste néanmoins
-informatif pour le choix d'architecture.
+**Limites résolues et restantes.** Le passage au dataset complet a réglé le principal
+problème de la première version du comparatif : la classe `safety-vest`, jusque-là non
+détectée du tout (AP 0,000) par Faster R-CNN et SSDlite faute d'exemples suffisants dans
+le sous-échantillon de 600 images, atteint désormais 0,309 et 0,185 respectivement — la
+cause était bien un problème d'échantillon d'entraînement, pas d'architecture. Les faux
+positifs restent en revanche fréquents sur les gilets réfléchissants dans des conditions
+d'éclairage extrêmes (contre-jour, nuit), une limite structurelle du dataset plutôt qu'un
+défaut de protocole d'entraînement.
 
-**Gestion du sur-apprentissage.** Le risque de sur-apprentissage (modèle qui mémorise le
-train set plutôt que de généraliser) est traité par le early stopping (`patience=10`,
-section 4.2) pour YOLO, et par le nombre volontairement limité d'epochs (3) pour les
-modèles torchvision — un entraînement plus long sans régularisation supplémentaire sur un
-sous-échantillon de 600 images aurait probablement dégradé la généralisation plutôt que
-de l'améliorer. C'est une amélioration à surveiller en priorité lors du passage à
-l'échelle complète (section 9.5) : ajouter du weight decay ou de la data augmentation
-plus agressive si le ré-entraînement GPU montre un écart train/val qui se creuse.
+**Gestion du sur-apprentissage.** Le risque de sur-apprentissage est traité par le early
+stopping (`patience=10`, section 4.2) pour YOLO. Pour les modèles torchvision, 30 epochs
+sur le dataset complet (4 708 images) restent dans une zone raisonnable sans early
+stopping explicite ; une prochaine itération pourrait ajouter du weight decay ou une
+surveillance de l'écart train/val si le nombre d'epochs venait à augmenter.
 
 **Validation du modèle retenu.** Le choix de YOLO26-nano comme modèle de production
 (plutôt que Faster R-CNN ou SSDlite) est cohérent avec les retours de la validation
 simulée des parties prenantes (section 9.2) : le responsable IT privilégie une solution
 sans dépendance matérielle propriétaire et le chef de chantier veut un système temps réel
 peu intrusif — deux critères que YOLO satisfait mieux que Faster R-CNN (plus lourd) dans
-ce protocole, SSDlite restant une option de repli pour un futur déploiement edge.
+ce protocole, SSDlite restant une option crédible pour un futur déploiement edge grâce à
+sa latence très inférieure.
 
 ## 9. Stratégie d'intégration de l'IA
 
@@ -365,13 +368,16 @@ se substituer à une validation terrain.
 
 ### 9.5 Ressources techniques pour la suite du projet
 
-Un serveur GPU (Scaleway) est disponible pour la suite du projet, ce qui permettra de
-lever la principale limite documentée en section 8 : le comparatif Faster R-CNN/SSDlite
-a été entraîné sur un sous-échantillon (600 images, 3 epochs, CPU) faute de GPU au moment
-de la rédaction. Un ré-entraînement sur le dataset complet (5 832 images d'entraînement,
-comme pour YOLO) est prévu pour fiabiliser la comparaison, en particulier sur la classe
-`safety-vest` actuellement sous-représentée dans l'échantillon utilisé (cf.
-`Donnees/rapport_nettoyage.json`).
+Un serveur GPU (Scaleway, NVIDIA L4) a été mobilisé pour lever la principale limite
+initialement documentée en section 8 : le comparatif Faster R-CNN/SSDlite, d'abord
+entraîné sur un sous-échantillon (600 images, 3 epochs, CPU) faute de GPU disponible, a
+été ré-entraîné sur le dataset complet (4 708 images, 30 epochs, même protocole que
+YOLO) — la classe `safety-vest`, jusque-là non détectée du tout, atteint désormais un
+AP@50 de 0,185 à 0,309 selon le modèle (cf. `Donnees/rapport_nettoyage.json` pour le
+détail du déséquilibre de classes à l'origine du problème). Pour la suite du projet, ce
+même accès GPU permettrait d'étendre le nombre de classes EPI couvertes (gants, lunettes,
+protection auditive — cf. classes disponibles dans SH17) ou de tester une variante YOLO
+plus grande (small/medium) si un gain de précision est jugé prioritaire sur la latence.
 
 Cette feuille de route s'aligne avec une logique de transformation numérique progressive
 plutôt qu'un déploiement big-bang, cohérente avec le principe de précaution nécessaire sur

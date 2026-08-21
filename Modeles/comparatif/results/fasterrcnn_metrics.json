@@ -1,36 +1,36 @@
 {
   "precision_per_class": {
-    "helmet": 0.0,
-    "head": 0.7660377358490567,
-    "safety-vest": 0.0
+    "helmet": 0.7049180327868853,
+    "head": 0.845035313668467,
+    "safety-vest": 0.47368421052631576
   },
   "recall_per_class": {
-    "helmet": 0.0,
-    "head": 0.6928327645051194,
-    "safety-vest": 0.0
+    "helmet": 0.5584415584415584,
+    "head": 0.8380716934487021,
+    "safety-vest": 0.3711340206185567
   },
   "f1_per_class": {
-    "helmet": 0.0,
-    "head": 0.7275985663082437,
-    "safety-vest": 0.0
+    "helmet": 0.6231884057971014,
+    "head": 0.8415390980554406,
+    "safety-vest": 0.4161849710982659
   },
   "ap50_per_class": {
-    "helmet": 0.2254500381388253,
-    "head": 0.7089505215785508,
-    "safety-vest": 0.0
+    "helmet": 0.5317337529353201,
+    "head": 0.8429778156329741,
+    "safety-vest": 0.3086541012324492
   },
-  "map50": 0.3114668532391254,
-  "precision_mean": 0.25534591194968553,
-  "recall_mean": 0.2309442548350398,
-  "f1_mean": 0.24253285543608125,
-  "latency_ms_per_image": 144.10953772695441,
+  "map50": 0.5611218899335811,
+  "precision_mean": 0.6745458523272228,
+  "recall_mean": 0.5892157575029391,
+  "f1_mean": 0.6269708249836027,
+  "latency_ms_per_image": 11.495830304172623,
   "n_params_millions": 18.940479,
-  "device": "cpu",
-  "n_eval_images": 150,
-  "train_time_seconds": 857.7082860469818,
+  "device": "cuda",
+  "n_eval_images": 1327,
+  "train_time_seconds": 9976.290194749832,
   "model": "fasterrcnn",
-  "epochs": 3,
-  "train_size": 600,
-  "val_size": 150,
-  "img_size": 320
+  "epochs": 30,
+  "train_size": 4708,
+  "val_size": 1327,
+  "img_size": 640
 }

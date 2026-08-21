@@ -83,7 +83,7 @@ projet solo). Assume-le plutôt que de bluffer — le jury valorise la lucidité
 | 1 | Données bien prétraitées et adaptées à la modélisation prédictive | Rapport §2.4-2.5, `dataset_yolo_epi/` | (cf. C3.1) |
 | 2 | Algorithmes ML testés et choix justifié | Rapport §4.1 (choix YOLO justifié : temps réel, dataset déséquilibré, transfer learning) + §8 (2 alternatives testées) | « YOLO a été choisi pour le temps réel, mais j'ai testé 2 architectures alternatives pour objectiver ce choix plutôt que de le poser a priori — voir C4.3. » |
 | 3 | Codes implémentés fonctionnels et sans erreur | `Modeles/projet.ipynb` (exécuté, sorties visibles), `Applications/app.py` (testé, démarre sans erreur — capture faite le 2026-08-10) | **Montrer le notebook exécuté avec les sorties, ou relancer l'app en live si possible.** |
-| 4 | Résultats du modèle répondent aux objectifs du cas métier | Rapport §5-6 (mAP@50 0,617 sur EPI 3 classes, règle de conformité en inférence, bandeau d'alerte) | « Le modèle EPI atteint 0,617 de mAP@50 avec un rappel priorisé (métrique la plus importante ici, cf. §5), et déclenche une vraie alerte visuelle testée sur image et vidéo. » |
+| 4 | Résultats du modèle répondent aux objectifs du cas métier | Rapport §5-6 (mAP@50 0,616 sur EPI 3 classes, règle de conformité en inférence, bandeau d'alerte) | « Le modèle EPI atteint 0,616 de mAP@50 avec un rappel priorisé (métrique la plus importante ici, cf. §5), et déclenche une vraie alerte visuelle testée sur image et vidéo. » |
 
 ---
 
@@ -93,16 +93,18 @@ projet solo). Assume-le plutôt que de bluffer — le jury valorise la lucidité
 
 | # | Indicateur | Où c'est | Ce que tu peux dire |
 |---|---|---|---|
-| 1 | Plusieurs modèles développés et comparés avec métriques appropriées | Rapport §8 + `Modeles/comparatif/RESULTATS.md` : YOLO26-nano, Faster R-CNN (MobileNetV3-FPN), SSDlite320 — précision/rappel/F1/mAP@50/latence/paramètres | « 3 architectures réellement entraînées et évaluées avec le même protocole, pas juste citées : YOLO (mAP 0,617), Faster R-CNN (0,311), SSDlite (0,184). » |
-| 2 | Améliorations proposées pertinentes (ex. gestion du sur-apprentissage) | Rapport §8, paragraphe « Gestion du sur-apprentissage » (early stopping `patience=10`, epochs volontairement limités sur les modèles torchvision) | « Le early stopping évite le sur-apprentissage sur YOLO ; pour les modèles de comparaison, j'ai volontairement limité les epochs plutôt que de sur-entraîner sur un petit échantillon — et j'ai identifié le weight decay/augmentation comme prochaine étape avec le GPU. » |
+| 1 | Plusieurs modèles développés et comparés avec métriques appropriées | Rapport §8 + `Modeles/comparatif/RESULTATS.md` : YOLO26-nano, Faster R-CNN (MobileNetV3-FPN), SSDlite320 — précision/rappel/F1/mAP@50/latence/paramètres, même protocole (dataset complet, 30 epochs, GPU L4) | « 3 architectures réellement entraînées et évaluées avec le même protocole, pas juste citées : YOLO (mAP 0,616), Faster R-CNN (0,561), SSDlite (0,370). » |
+| 2 | Améliorations proposées pertinentes (ex. gestion du sur-apprentissage) | Rapport §8, paragraphe « Gestion du sur-apprentissage » (early stopping `patience=10` pour YOLO) | « Le early stopping évite le sur-apprentissage sur YOLO. Pour les modèles de comparaison, la première itération sur 600 images avait un vrai problème d'échantillon (pas assez d'exemples de `safety-vest`) — corrigé en ré-entraînant sur le dataset complet via un serveur GPU. » |
 | 3 | Modèle final validé par les parties prenantes, éco-responsabilité prise en compte | Rapport §8 paragraphe « Validation du modèle retenu » (lien avec §9.2) + tableau paramètres (proxy énergie : YOLO 2,5M vs Faster R-CNN 18,9M de paramètres) | « Le nombre de paramètres sert de proxy d'empreinte énergétique — YOLO et SSDlite sont 8× plus légers que Faster R-CNN. Le choix final de YOLO est cohérent avec les critères exprimés par le "responsable IT" simulé (pas de dépendance matérielle lourde). » |
 
-**C'est la compétence qui a le plus progressé récemment** (comparatif à 3 modèles
-ajouté a posteriori) — sois prêt à expliquer *pourquoi* les résultats de Faster
-R-CNN/SSDlite sont plus faibles que YOLO : **échantillon d'entraînement volontairement
-réduit (600 images, 3 epochs, CPU) faute de GPU au moment de l'entraînement**, et non un
-défaut d'architecture. Dis-le avant qu'on te le demande, ça montre que tu maîtrises la
-limite plutôt que de la subir.
+**C'est la compétence qui a le plus progressé récemment.** Sois prêt à raconter
+l'évolution : une première version du comparatif (600 images, 3 epochs, CPU) donnait un
+AP à 0,000 sur `safety-vest` pour Faster R-CNN et SSDlite — pas un défaut d'architecture,
+mais un échantillon trop réduit pour cette classe rare. Après accès à un serveur GPU, le
+ré-entraînement sur le dataset complet (30 epochs, même protocole pour les 3 modèles) a
+fait passer `safety-vest` à 0,309 (Faster R-CNN) et 0,185 (SSDlite). **Raconte cette
+itération** — ça montre une vraie démarche scientifique (diagnostic → hypothèse →
+correction → nouvelle mesure), pas juste un résultat final.
 
 ---
 
@@ -113,7 +115,7 @@ limite plutôt que de la subir.
 | 1 | Présentation structurée, claire, synthétique sur C3.1 à C5.3, dans le temps imparti (45 min max) | Prépare un plan de présentation qui suit l'ordre du rapport (données → modélisation → comparatif → stratégie), chronomètre-toi à l'avance. |
 | 2 | Argumentation rigoureuse des choix méthodologiques et techniques au regard des besoins métiers | Pour chaque choix (YOLO, 3 classes EPI, seuil de confiance, architecture du dashboard), sache dire *pourquoi ce choix et pas un autre* — les tableaux ci-dessus te donnent la réponse pour chaque point. |
 | 3 | Rapport (et support) structuré, clair, lisible, universellement accessible | `Documentation/Rapport.pdf` — vérifie qu'il s'ouvre bien et que les images sont lisibles avant le jour J. |
-| 4 | Défendre ses choix avec assurance, répondre avec rigueur, s'adapter au profil du jury | Anticipe les questions pièges : *« Pourquoi seulement 600 images pour Faster R-CNN ? »* (réponse : contrainte GPU, transparence assumée, plan de ré-entraînement en §9.5), *« Le dashboard a-t-il été testé par de vrais utilisateurs ? »* (non, validation simulée, assumé §9.2). |
+| 4 | Défendre ses choix avec assurance, répondre avec rigueur, s'adapter au profil du jury | Anticipe les questions pièges : *« Le comparatif est-il fiable ? »* (oui, désormais même protocole GPU pour les 3 modèles — raconte l'itération 600→4708 images), *« Le dashboard a-t-il été testé par de vrais utilisateurs ? »* (non, validation simulée, assumé §9.2). |
 
 ---
 
@@ -123,7 +125,7 @@ limite plutôt que de la subir.
 |---|---|---|
 | Pourquoi avoir réentraîné alors que le dataset est déjà annoté ? | COCO (poids de départ) ne connaît pas les classes EPI — le réentraînement adapte la tête de détection à ces nouvelles classes, ce n'est pas une répétition inutile | Section "pourquoi nettoyer/réentraîner" de la conversation, à reformuler dans tes mots |
 | Le dataset est-il vraiment "nettoyé" si vous n'avez rien supprimé ? | Le nettoyage = contrôle qualité (0 image corrompue, 0 doublon sur 8 099), pas suppression arbitraire — un dataset propre au départ n'a pas besoin d'être charcuté | `Donnees/rapport_nettoyage.json` |
-| Le comparatif de modèles est-il fiable avec seulement 600 images ? | Non, c'est une limite assumée et documentée, avec un plan de correction concret (GPU Scaleway, dataset complet) | Rapport §8 + §9.5 |
+| Le comparatif de modèles était-il fiable avec seulement 600 images ? | Non initialement (limite assumée), corrigé depuis : ré-entraîné sur GPU avec le dataset complet et un protocole identique pour les 3 modèles | Rapport §8 + §9.5, `Modeles/comparatif/RESULTATS.md` |
 | Le tableau de bord a-t-il été validé par de vrais chefs de chantier ? | Non — validation simulée avec des profils types, assumée comme telle, à refaire en phase 1 de la feuille de route | Rapport §9.2 |
 | Qu'est-ce qui prouve que l'app fonctionne réellement ? | Démo live, ou capture de l'exécution réussie du 2026-08-10 (démarrage sans erreur, HTTP 200) | `Applications/app.py` |
 
@@ -132,8 +134,8 @@ limite plutôt que de la subir.
 ## Check-list avant l'oral
 
 - [ ] Relire `Documentation/Rapport.pdf` en entier une fois à voix haute
-- [ ] Savoir citer de mémoire : mAP@50 du modèle EPI (0,617), les 3 modèles comparés et
-      leur mAP@50 respectif (0,617 / 0,311 / 0,184)
+- [ ] Savoir citer de mémoire : mAP@50 du modèle EPI (0,616), les 3 modèles comparés et
+      leur mAP@50 respectif (YOLO 0,616 / Faster R-CNN 0,561 / SSDlite 0,370)
 - [ ] Pouvoir lancer `streamlit run Applications/app.py` en live si le jury demande une démo
 - [ ] Avoir un lien de déploiement Streamlit Cloud fonctionnel (à faire — voir README)
 - [ ] Savoir expliquer en 1 phrase chaque limite assumée (échantillon réduit, validation

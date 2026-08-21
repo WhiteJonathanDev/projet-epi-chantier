@@ -121,7 +121,8 @@ COMPLIANT_CLASSES_EPI = [0, 2]  # helmet, safety-vest presents = conforme
 MISSING_HINT_EPI = {1: "helmet"}  # "head" detecte sans casque -> casque manquant
 
 AVAILABLE_MODELS = {
-    "YOLO - EPI (3 classes)": MODELS_DIR / "train-4" / "weights" / "best.pt",
+    "YOLO - EPI (3 classes, GPU 30 epochs)": MODELS_DIR / "yolo_epi_gpu" / "weights" / "best.pt",
+    "YOLO - EPI (3 classes, CPU 20 epochs)": MODELS_DIR / "train-4" / "weights" / "best.pt",
     "YOLO - SH17 complet (17 classes)": MODELS_DIR / "train" / "weights" / "best.pt",
 }
 

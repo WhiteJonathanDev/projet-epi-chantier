@@ -1,12 +1,16 @@
 """Entraine (fine-tuning, tete de detection reentrainee) et evalue un modele
 torchvision sur le dataset EPI (3 classes), pour comparaison avec YOLO.
 
-Usage:
-    python3 train_eval.py --model fasterrcnn --epochs 3 --train_size 1200 --val_size 300
-    python3 train_eval.py --model ssdlite --epochs 3 --train_size 1200 --val_size 300
+Usage (dataset attendu dans ../dataset_yolo_epi par defaut, cf. Donnees/README.md pour
+le reconstruire) :
+    python3 train_eval.py --model fasterrcnn --epochs 30 --train_size 999999 --val_size 999999 --img_size 640
+    python3 train_eval.py --model ssdlite --epochs 30 --train_size 999999 --val_size 999999 --img_size 640
+
+Resultats GPU (NVIDIA L4, dataset complet, 30 epochs) dans results/*.json.
 """
 import argparse
 import json
+import os
 import time
 from pathlib import Path
 
@@ -26,8 +30,9 @@ from dataset_torchvision import EpiDataset, collate_fn, CLASSES
 from metrics import precision_recall_f1, average_precision_per_class
 
 NUM_CLASSES = len(CLASSES)  # background + 3
-DATASET_ROOT = "/Users/ecole18.06-t.m.t/Desktop/COMPUTER VISION/projet/dataset_yolo_epi"
-OUT_DIR = Path("/Users/ecole18.06-t.m.t/Desktop/COMPUTER VISION/projet/comparatif/results")
+SCRIPT_DIR = Path(__file__).resolve().parent
+DATASET_ROOT = os.environ.get("EPI_DATASET_ROOT", str(SCRIPT_DIR.parent.parent / "dataset_yolo_epi"))
+OUT_DIR = Path(os.environ.get("EPI_RESULTS_DIR", str(SCRIPT_DIR / "results")))
 OUT_DIR.mkdir(exist_ok=True, parents=True)
 
 
@@ -143,9 +148,9 @@ def main():
     print(f"Train: {len(train_ds)} images | Val: {len(val_ds)} images", flush=True)
 
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True,
-                               collate_fn=collate_fn, num_workers=0)
+                               collate_fn=collate_fn, num_workers=min(8, os.cpu_count() or 4))
     val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False,
-                             collate_fn=collate_fn, num_workers=0)
+                             collate_fn=collate_fn, num_workers=min(8, os.cpu_count() or 4))
 
     model = build_model(args.model)
 

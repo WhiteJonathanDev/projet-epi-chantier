@@ -292,6 +292,22 @@ complète (dataset entier, davantage d'epochs, GPU dédié) améliorerait vraise
 tous les modèles de façon comparable — le classement relatif observé ici reste néanmoins
 informatif pour le choix d'architecture.
 
+**Gestion du sur-apprentissage.** Le risque de sur-apprentissage (modèle qui mémorise le
+train set plutôt que de généraliser) est traité par le early stopping (`patience=10`,
+section 4.2) pour YOLO, et par le nombre volontairement limité d'epochs (3) pour les
+modèles torchvision — un entraînement plus long sans régularisation supplémentaire sur un
+sous-échantillon de 600 images aurait probablement dégradé la généralisation plutôt que
+de l'améliorer. C'est une amélioration à surveiller en priorité lors du passage à
+l'échelle complète (section 9.5) : ajouter du weight decay ou de la data augmentation
+plus agressive si le ré-entraînement GPU montre un écart train/val qui se creuse.
+
+**Validation du modèle retenu.** Le choix de YOLO26-nano comme modèle de production
+(plutôt que Faster R-CNN ou SSDlite) est cohérent avec les retours de la validation
+simulée des parties prenantes (section 9.2) : le responsable IT privilégie une solution
+sans dépendance matérielle propriétaire et le chef de chantier veut un système temps réel
+peu intrusif — deux critères que YOLO satisfait mieux que Faster R-CNN (plus lourd) dans
+ce protocole, SSDlite restant une option de repli pour un futur déploiement edge.
+
 ## 9. Stratégie d'intégration de l'IA
 
 ### 9.1 Cas d'usage prioritaires
@@ -305,7 +321,25 @@ informatif pour le choix d'architecture.
   l'investissement matériel initial et de valider le système sur un périmètre maîtrisé
   avant généralisation.
 
-### 9.2 Impact métier
+### 9.2 Validation avec les parties prenantes (exercice simulé)
+
+Ce projet étant réalisé en contexte scolaire, sans accès à un chantier réel, la validation
+des cas d'usage ci-dessus a été construite comme un **exercice de simulation assumé** :
+les cas d'usage et leur priorisation ont été confrontés à trois profils métier fictifs mais
+réalistes, dont les retours attendus sont résumés ci-dessous.
+
+| Partie prenante (simulée) | Priorité exprimée | Retour sur la solution proposée |
+|---|---|---|
+| **Chef de chantier** | Ne pas ajouter de charge de contrôle manuel supplémentaire | Valide le principe d'un contrôle automatique passif (caméras existantes), à condition que le dashboard reste simple à lire sans formation longue |
+| **Responsable HSE (Hygiène-Sécurité-Environnement)** | Le casque et le gilet avant tout — ce sont les EPI dont l'absence a le plus fort impact statistique sur la gravité des accidents | Confirme la priorisation du modèle EPI 3 classes (helmet, head, safety-vest) plutôt que les 17 classes SH17 ; demande un export des statistiques de conformité pour ses rapports mensuels réglementaires |
+| **Responsable IT/infrastructure** | Solution compatible avec les caméras déjà installées, pas de nouveau matériel propriétaire | Valide l'approche logicielle (modèle + dashboard) sans dépendance matérielle spécifique ; recommande SSDlite pour un futur déploiement sur boîtier edge basse consommation (cf. section 8) |
+
+**Limite assumée.** Cette validation reste simulée et devra être reproduite avec de vrais
+interlocuteurs métier avant tout déploiement réel (phase 1 de la feuille de route,
+section 9.4) — elle sert ici à démontrer la démarche de concertation attendue plutôt qu'à
+se substituer à une validation terrain.
+
+### 9.3 Impact métier
 
 - **Changement de processus** : le contrôle EPI passe d'une inspection visuelle ponctuelle
   (chef de chantier) à une supervision continue et journalisée (dashboard), permettant un
@@ -321,13 +355,23 @@ informatif pour le choix d'architecture.
 | **Interne** | **Forces** : détection continue, statistiques exploitables, coût marginal faible (caméras existantes) | **Faiblesses** : rappel imparfait sur classes rares, dépendance à la qualité d'image (éclairage, angle) |
 | **Externe** | **Opportunités** : réduction des accidents et des coûts associés, argument de conformité réglementaire | **Menaces** : acceptabilité sociale (surveillance), responsabilité juridique en cas de faux négatif non traité |
 
-### 9.3 Feuille de route
+### 9.4 Feuille de route
 
-| Phase | Contenu | Indicateur de succès |
-|---|---|---|
-| **1. Test (1–2 mois)** | Déploiement sur le chantier pilote, modèle EPI 3 classes, dashboard en mode observation (pas d'alerte automatique bloquante) | Taux de faux positifs mesuré, retours qualitatifs des équipes sécurité |
-| **2. Généralisation (3–6 mois)** | Extension à plusieurs chantiers, ajout de classes EPI supplémentaires si besoin métier confirmé, intégration des alertes dans le processus sécurité existant | Taux de conformité en hausse mesurable, adoption par les responsables sécurité |
-| **3. Optimisation (continu)** | Ré-entraînement périodique sur données du terrain, optimisation latence/édge (candidat : SSDlite, cf. section 8), tableau de bord enrichi (comparaison inter-chantiers) | Latence compatible temps réel sur caméras de chantier, réduction mesurée des incidents |
+| Phase | Contenu | Ressources nécessaires | Indicateur de succès |
+|---|---|---|---|
+| **1. Test (1–2 mois)** | Déploiement sur le chantier pilote, modèle EPI 3 classes, dashboard en mode observation (pas d'alerte automatique bloquante) | 1 data scientist (0,5 ETP), accès caméras existantes du chantier pilote, hébergement cloud léger (dashboard) | Taux de faux positifs mesuré, retours qualitatifs des équipes sécurité |
+| **2. Généralisation (3–6 mois)** | Extension à plusieurs chantiers, ajout de classes EPI supplémentaires si besoin métier confirmé, intégration des alertes dans le processus sécurité existant | 1 data scientist + 1 référent HSE par site (temps partiel), budget GPU pour ré-entraînement (cf. section 9.5), formation des responsables sécurité à l'outil | Taux de conformité en hausse mesurable, adoption par les responsables sécurité |
+| **3. Optimisation (continu)** | Ré-entraînement périodique sur données du terrain, optimisation latence/édge (candidat : SSDlite, cf. section 8), tableau de bord enrichi (comparaison inter-chantiers) | Budget récurrent de maintenance/ré-entraînement, boîtiers edge si passage en local (candidat SSDlite) | Latence compatible temps réel sur caméras de chantier, réduction mesurée des incidents |
+
+### 9.5 Ressources techniques pour la suite du projet
+
+Un serveur GPU (Scaleway) est disponible pour la suite du projet, ce qui permettra de
+lever la principale limite documentée en section 8 : le comparatif Faster R-CNN/SSDlite
+a été entraîné sur un sous-échantillon (600 images, 3 epochs, CPU) faute de GPU au moment
+de la rédaction. Un ré-entraînement sur le dataset complet (5 832 images d'entraînement,
+comme pour YOLO) est prévu pour fiabiliser la comparaison, en particulier sur la classe
+`safety-vest` actuellement sous-représentée dans l'échantillon utilisé (cf.
+`Donnees/rapport_nettoyage.json`).
 
 Cette feuille de route s'aligne avec une logique de transformation numérique progressive
 plutôt qu'un déploiement big-bang, cohérente avec le principe de précaution nécessaire sur

@@ -1,0 +1,42 @@
+{
+  "splits": {
+    "train": {
+      "n_images_total": 5832,
+      "n_images_avec_annotation_epi": 4708,
+      "n_images_sans_annotation_epi": 1124,
+      "n_boxes_epi": 9832,
+      "distribution_classes": {
+        "helmet": 707,
+        "head": 8709,
+        "safety-vest": 416
+      }
+    },
+    "val": {
+      "n_images_total": 1620,
+      "n_images_avec_annotation_epi": 1327,
+      "n_images_sans_annotation_epi": 293,
+      "n_boxes_epi": 2678,
+      "distribution_classes": {
+        "helmet": 154,
+        "head": 2427,
+        "safety-vest": 97
+      }
+    },
+    "test": {
+      "n_images_total": 647,
+      "n_images_avec_annotation_epi": 509,
+      "n_images_sans_annotation_epi": 138,
+      "n_boxes_epi": 932,
+      "distribution_classes": {
+        "helmet": 66,
+        "head": 849,
+        "safety-vest": 17
+      }
+    }
+  },
+  "images_corrompues": [],
+  "n_images_corrompues": 0,
+  "doublons_exacts": [],
+  "n_doublons_exacts": 0,
+  "n_images_scannees_total": 8099
+}

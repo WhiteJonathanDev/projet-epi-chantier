@@ -42,3 +42,34 @@ pour le détail complet. Résumé :
 `dataset_yolo/` et `dataset_yolo_epi/` sont au format YOLO (compatible Ultralytics et,
 après conversion — voir `Modeles/comparatif/dataset_torchvision.py` —, avec les modèles
 `torchvision.models.detection` utilisés dans le comparatif multi-modèles).
+
+## Contenu de ce dossier
+
+Les images brutes (13 Go) ne sont pas versionnées, mais tout le reste du travail de
+nettoyage/annotation l'est :
+
+- **`annotations_epi/labels/{train,val,test}/`** — les 6 544 fichiers d'annotation YOLO
+  (3 classes EPI : helmet, head, safety-vest) réellement utilisés pour entraîner les
+  modèles. Chaque fichier `.txt` correspond à une image (`classe xc yc largeur hauteur`,
+  coordonnées normalisées) — c'est le livrable « annotations » à proprement parler,
+  indépendant des images elles-mêmes.
+- **`echantillon_annote/`** — 12 images du dataset avec les bounding boxes dessinées
+  dessus, pour illustrer visuellement la qualité des annotations (pas un échantillon de
+  travail, juste un aperçu).
+- **`rapport_nettoyage.json`** (généré par `data_cleaning_report.py`, exécuté sur les
+  8 099 images) — résultat réel du contrôle qualité automatique :
+
+  | Contrôle | Résultat |
+  |---|---|
+  | Images scannées | 8 099 |
+  | Images corrompues/illisibles | 0 |
+  | Doublons exacts (hash de contenu) | 0 |
+  | Images avec au moins une annotation EPI | 6 544 (train 4 708, val 1 327, test 509) |
+  | Images sans annotation EPI (aucun helmet/head/safety-vest visible) | 1 555 |
+  | Instances par classe (train+val+test) | head : 11 985 · helmet : 927 · safety-vest : 530 |
+
+  Ce dernier chiffre confirme, sur le sous-ensemble EPI, le déséquilibre déjà identifié
+  section 2.2 du rapport (classe `head` trois fois plus fréquente à elle seule que
+  `helmet`+`safety-vest` réunies) — c'est ce déséquilibre qui explique la faible
+  performance sur `safety-vest` du comparatif multi-modèles (`Modeles/comparatif/RESULTATS.md`).
+  Reproductible avec `python3 Donnees/data_cleaning_report.py`.

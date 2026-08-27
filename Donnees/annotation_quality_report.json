@@ -1,0 +1,38 @@
+{
+  "n_files_total": 6544,
+  "n_boxes_total": 13442,
+  "n_boxes_out_of_range": 187,
+  "n_boxes_degenerate_removed": 17,
+  "n_boxes_extreme_aspect_ratio_flagged": 0,
+  "n_files_corrected": 187,
+  "examples_out_of_range": [
+    "labels/train/pexels-photo-11679689.txt: (0.947388, 0.654093, 0.105225, 0.491119)",
+    "labels/train/pexels-photo-12831620.txt: (0.006944, 0.882675, 0.013889, 0.031798)",
+    "labels/train/pexels-photo-13030034.txt: (0.994635, 0.859647, 0.010731, 0.013284)",
+    "labels/train/pexels-photo-13963338.txt: (0.989943, 0.484375, 0.020115, 0.028017)",
+    "labels/train/pexels-photo-15534813.txt: (0.953624, 0.288625, 0.092753, 0.32625)",
+    "labels/train/pexels-photo-16488529.txt: (0.083333, 0.275975, 0.166667, 0.53019)",
+    "labels/train/pexels-photo-16633215.txt: (0.268092, 0.065493, 0.103436, 0.130987)",
+    "labels/train/pexels-photo-2760241.txt: (0.325691, 0.749065, 0.289908, 0.501871)",
+    "labels/train/pexels-photo-3182781.txt: (0.051083, 0.44955, 0.102167, 0.252248)",
+    "labels/train/pexels-photo-3183188.txt: (0.96029, 0.367917, 0.079421, 0.101167)"
+  ],
+  "examples_degenerate": [
+    "labels/train/pexels-photo-1115358.txt: w=0.0020 h=0.0048",
+    "labels/train/pexels-photo-13376117.txt: w=0.0020 h=0.0049",
+    "labels/train/pexels-photo-13376117.txt: w=0.0020 h=0.0038",
+    "labels/train/pexels-photo-13376117.txt: w=0.0020 h=0.0035",
+    "labels/train/pexels-photo-13376117.txt: w=0.0020 h=0.0035",
+    "labels/train/pexels-photo-13376117.txt: w=0.0018 h=0.0046",
+    "labels/train/pexels-photo-13376117.txt: w=0.0016 h=0.0031",
+    "labels/train/pexels-photo-13376117.txt: w=0.0020 h=0.0040",
+    "labels/train/pexels-photo-13376117.txt: w=0.0017 h=0.0029",
+    "labels/train/pexels-photo-13376117.txt: w=0.0020 h=0.0040"
+  ],
+  "examples_extreme_aspect_ratio": [],
+  "per_class_box_count": {
+    "helmet": 927,
+    "head": 11985,
+    "safety-vest": 530
+  }
+}

@@ -15,6 +15,8 @@ import streamlit as st
 from PIL import Image
 from ultralytics import YOLO
 
+from compliance import CLASS_NAMES_EPI, evaluate_compliance
+
 APP_DIR = Path(__file__).resolve().parent
 MODELS_DIR = APP_DIR.parent / "Modeles" / "runs" / "detect"
 
@@ -116,9 +118,6 @@ TEXT = {
     },
 }
 
-CLASS_NAMES_EPI = {0: "helmet", 1: "head", 2: "safety-vest"}
-COMPLIANT_CLASSES_EPI = [0, 2]  # helmet, safety-vest presents = conforme
-MISSING_HINT_EPI = {1: "helmet"}  # "head" detecte sans casque -> casque manquant
 
 AVAILABLE_MODELS = {
     "YOLO - EPI (3 classes, GPU 30 epochs)": MODELS_DIR / "yolo_epi_gpu" / "weights" / "best.pt",
@@ -192,12 +191,7 @@ def main():
                 img = Image.open(fichier)
                 results, classes = run_detection(model, img, confidence)
 
-                conforme = True
-                missing = []
-                if is_epi_model and classes:
-                    conforme = any(c in COMPLIANT_CLASSES_EPI for c in classes)
-                    if not conforme:
-                        missing = [MISSING_HINT_EPI.get(int(c)) for c in classes if int(c) in MISSING_HINT_EPI]
+                conforme, missing = (True, []) if not is_epi_model else evaluate_compliance(classes)
 
                 col1, col2 = st.columns([2, 1])
                 with col1:
@@ -242,9 +236,7 @@ def main():
                         break
                     if frame_idx % sample_rate == 0:
                         results, classes = run_detection(model, frame, confidence)
-                        conforme = True
-                        if is_epi_model and classes:
-                            conforme = any(c in COMPLIANT_CLASSES_EPI for c in classes)
+                        conforme, _ = (True, []) if not is_epi_model else evaluate_compliance(classes)
                         if not conforme:
                             alerts_in_video += 1
                         analysed += 1

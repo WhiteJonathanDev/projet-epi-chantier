@@ -6,3 +6,4 @@ dataset_yolo/
 dataset_yolo_epi/
 __pycache__/
 *.pyc
+.pytest_cache/

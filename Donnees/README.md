@@ -10,15 +10,15 @@ Le dataset brut n'est pas inclus dans ce dépôt (~13 Go). Pour le reconstruire 
 
 1. Télécharger le dataset SH17 depuis le lien ci-dessus (ou depuis
    [GitHub](https://github.com/ahmadmughees/SH17dataset)).
-2. Placer les données brutes dans un dossier `dataset_kaggle/` à la racine de `Modeles/`.
-3. Exécuter `Modeles/projet.ipynb` depuis le début (section 1) : il reconstruit
+2. Placer les données brutes dans un dossier `dataset_kaggle/` à la racine de `Applications/`.
+3. Exécuter `Applications/projet.ipynb` depuis le début (section 1) : il reconstruit
    automatiquement `dataset_yolo/` (17 classes) et `dataset_yolo_epi/` (3 classes EPI —
    helmet, head, safety-vest, cf. Axe B) au format YOLO
    (`images/{train,val,test}/`, `labels/{train,val,test}/`).
 
 ## Nettoyage et transformation (détail méthodologique)
 
-Voir `Modeles/projet.ipynb`, section 1, et `Documentation/Rapport.md`/`.pdf`, section 1,
+Voir `Applications/projet.ipynb`, section 1, et `Documentations/Rapport.md`/`.pdf`, section 1,
 pour le détail complet. Résumé :
 
 - **Réorganisation** : passage du format SH17 (dossier unique + listes `train.txt`/`val.txt`)
@@ -73,3 +73,21 @@ nettoyage/annotation l'est :
   `helmet`+`safety-vest` réunies) — c'est ce déséquilibre qui explique la faible
   performance sur `safety-vest` du comparatif multi-modèles (`Modeles/comparatif/RESULTATS.md`).
   Reproductible avec `python3 Donnees/data_cleaning_report.py`.
+- **`annotation_quality_report.json`** (généré par `annotation_quality.py`, exécuté sur
+  les 6 544 fichiers d'annotation) — contrôle de la qualité des **boîtes englobantes**
+  elles-mêmes (pas seulement des images), avec correction automatique :
+
+  | Contrôle | Résultat |
+  |---|---|
+  | Boîtes analysées | 13 442 |
+  | Boîtes avec coordonnées hors [0,1] (bbox débordant de l'image) | 187 → **corrigées** (clip à [0,1]) |
+  | Boîtes dégénérées (largeur ou hauteur quasi nulle) | 17 → **supprimées** |
+  | Boîtes à ratio d'aspect extrême (>15:1) | 0 signalée |
+  | Fichiers modifiés par la correction | 187 sur 6 544 (2,9 %) |
+
+  Les annotations corrigées sont dans `annotations_epi_corrigees/` (dossier séparé, les
+  originaux ne sont jamais écrasés). Les modèles actuels ont été entraînés sur les
+  annotations d'origine : l'impact des 187 boîtes corrigées (1,4 % du total) est jugé
+  marginal au vu de leur faible proportion, mais un ré-entraînement sur
+  `annotations_epi_corrigees/` reste la suite logique avant un déploiement en production.
+  Reproductible avec `python3 Donnees/annotation_quality.py`.

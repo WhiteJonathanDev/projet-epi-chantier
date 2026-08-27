@@ -420,8 +420,7 @@ zone / période, guide d'utilisation intégré, mode contraste élevé et biling
 l'accessibilité. Code : `Applications/app.py` (logique de conformité isolée et testée
 dans `Applications/compliance.py`).
 
-**Lien de déploiement** : _à compléter après déploiement sur Streamlit Community Cloud
-(ou équivalent) — voir `Documentations/README.md`._
+**Lien de déploiement** : https://projet-epi-chantier-mvtndcpcszbixny25gbosx.streamlit.app/
 
 ### 10.3 Tests unitaires
 

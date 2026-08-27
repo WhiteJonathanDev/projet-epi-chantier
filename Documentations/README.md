@@ -67,8 +67,7 @@ alertes de non-conformité, tableau de bord (taux de conformité, heatmap des zo
 risque, timeline des alertes) avec filtres par type d'EPI / zone / période, guide
 d'utilisation intégré, mode contraste élevé et bilingue FR/EN pour l'accessibilité.
 
-**Lien de déploiement** : _à compléter après déploiement sur Streamlit Community Cloud_
-(voir `Documentations/Rapport.md`, section Livrables, pour la marche à suivre).
+**Lien de déploiement** : https://projet-epi-chantier-mvtndcpcszbixny25gbosx.streamlit.app/
 
 ## Tests unitaires
 
